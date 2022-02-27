@@ -32,6 +32,7 @@ spec:
         args:
         - --leader-elect
         image: ghcr.io/snapp-incubator/grafana-complementary-operator:main
+        imagePullPolicy: Always
         name: manager
         securityContext:
           allowPrivilegeEscalation: false

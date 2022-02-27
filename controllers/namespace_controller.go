@@ -22,6 +22,7 @@ import (
 
 	grafanav1alpha1 "github.com/grafana-operator/grafana-operator/v4/api/integreatly/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -31,9 +32,10 @@ import (
 )
 
 const (
-	baseNs        = "snappcloud-monitoring"
-	baseSa        = "monitoring-datasource"
-	prometheusURL = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
+	baseNs            = "snappcloud-monitoring"
+	baseSa            = "monitoring-datasource"
+	prometheusURL     = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
+	nsMonitoringLabel = "monitoring-ns"
 )
 
 // NamespaceReconciler reconciles a Namespace object
@@ -61,11 +63,33 @@ type NamespaceReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
+	ns := &corev1.Namespace{}
+	err := r.Get(ctx, req.NamespacedName, ns)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			logger.Info("Resource not found. Ignoring since object must be deleted")
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		logger.Error(err, "Failed to get Namespace")
+		return ctrl.Result{}, err
+	}
+
+	// Ignore namespaces which does not have special label
+	if _, ok := ns.Labels[nsMonitoringLabel]; !ok {
+		logger.Info("Namespace does not have monitoring label. Ignoring", "namespace", ns.Name)
+		return ctrl.Result{}, nil
+	}
 
 	logger.Info("Reconciling Namespace", "Namespace.Name", req.NamespacedName)
+
 	// getting serviceAccount
+	logger.Info("Getting serviceAccount", "serviceAccount.Name", baseSa, "Namespace.Name", req.NamespacedName)
 	sa := &corev1.ServiceAccount{}
-	err := r.Get(ctx, types.NamespacedName{Name: baseSa, Namespace: req.Name}, sa)
+	err = r.Get(ctx, types.NamespacedName{Name: baseSa, Namespace: req.Name}, sa)
 	if err != nil {
 		logger.Error(err, "unable to get ServiceAccount")
 		return ctrl.Result{}, err
@@ -75,6 +99,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	secret := &corev1.Secret{}
 	var token string
 	for _, ref := range sa.Secrets {
+
+		logger.Info("Getting secret", "secret.Name", ref.Name, "Namespace.Name", req.Name)
 		// get secret
 		err = r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: req.Name}, secret)
 		if err != nil {
@@ -89,11 +115,13 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		name := secret.Annotations[corev1.ServiceAccountNameKey]
 		uid := secret.Annotations[corev1.ServiceAccountUIDKey]
 		tokenData := secret.Data[corev1.ServiceAccountTokenKey]
+		logger.Info("token data", "token", string(tokenData))
 		if name == ref.Name && uid == string(ref.UID) && len(tokenData) > 0 {
 			// found token, the first token found is used
 			token = string(tokenData)
 			break
 		}
+
 	}
 	// if no token found
 	if token == "" {
@@ -130,6 +158,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			}},
 		},
 	}
+
+	logger.Info("creating grafana datasource", "grafanaDatasource.Name", grafanaDatasource.Name)
 	err = r.Create(ctx, grafanaDatasource)
 	if err != nil {
 		logger.Error(err, "unable to create GrafanaDataSource")
