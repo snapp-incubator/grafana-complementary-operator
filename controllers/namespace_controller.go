@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	grafanav1alpha1 "github.com/grafana-operator/grafana-operator/v4/api/integreatly/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +28,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+const (
+	baseNs        = "snappcloud-monitoring"
+	baseSa        = "monitoring-datasource"
+	prometheusURL = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
 )
 
 // NamespaceReconciler reconciles a Namespace object
@@ -53,29 +60,46 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// getting serviceAccount
 	sa := &corev1.ServiceAccount{}
-	err := r.Get(ctx, types.NamespacedName{Name: "monitoring-datasource", Namespace: req.Name}, sa)
+	err := r.Get(ctx, types.NamespacedName{Name: baseSa, Namespace: req.Name}, sa)
 	if err != nil {
 		logger.Error(err, "unable to get ServiceAccount")
 		return ctrl.Result{}, err
 	}
 
-	// getting secret
-	secretName := sa.Secrets[0].Name
+	// getting serviceaccount token
 	secret := &corev1.Secret{}
-	err = r.Get(ctx, types.NamespacedName{Name: secretName, Namespace: req.Name}, secret)
-	if err != nil {
-		logger.Error(err, "unable to get Secret")
+	var token string
+	for _, ref := range sa.Secrets {
+		// get secret
+		err = r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: req.Name}, secret)
+		if err != nil {
+			logger.Error(err, "unable to get Secret")
+			return ctrl.Result{}, err
+		}
+
+		// check if secret is a token for the serviceaccount
+		if secret.Type != corev1.SecretTypeServiceAccountToken {
+			continue
+		}
+		name := secret.Annotations[corev1.ServiceAccountNameKey]
+		uid := secret.Annotations[corev1.ServiceAccountUIDKey]
+		tokenData := secret.Data[corev1.ServiceAccountTokenKey]
+		if name == ref.Name && uid == string(ref.UID) && len(tokenData) > 0 {
+			// found token, the first token found is used
+			token = string(tokenData)
+			break
+		}
+	}
+	// if no token found
+	if token == "" {
+		logger.Error(fmt.Errorf("did not found service account token for service account %q", sa.Name), "")
 		return ctrl.Result{}, err
 	}
 
-	b64token := string(secret.Data["token"])
-
-	//decode b64
-	// token = b64dec(b64token)
 	grafanaDatasource := &grafanav1alpha1.GrafanaDataSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      req.Name,
-			Namespace: "snappcloud-monitoring",
+			Namespace: baseNs,
 		},
 		Spec: grafanav1alpha1.GrafanaDataSourceSpec{
 			Name: req.Name + ".yaml",
@@ -86,7 +110,7 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 				Name:      req.Name,
 				OrgId:     1,
 				Type:      "prometheus",
-				Url:       "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092",
+				Url:       prometheusURL,
 				Version:   1,
 				JsonData: grafanav1alpha1.GrafanaDataSourceJsonData{
 					HTTPMethod:      "POST",
@@ -95,7 +119,7 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 					HTTPHeaderName2: "namespace",
 				},
 				SecureJsonData: grafanav1alpha1.GrafanaDataSourceSecureJsonData{
-					HTTPHeaderValue1: "Bearer " + b64token,
+					HTTPHeaderValue1: "Bearer " + token,
 					HTTPHeaderValue2: req.Name,
 				},
 			}},
