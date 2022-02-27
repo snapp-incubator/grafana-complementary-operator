@@ -62,6 +62,7 @@ type NamespaceReconciler struct {
 func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
+	logger.Info("Reconciling Namespace", "Namespace.Name", req.NamespacedName)
 	// getting serviceAccount
 	sa := &corev1.ServiceAccount{}
 	err := r.Get(ctx, types.NamespacedName{Name: baseSa, Namespace: req.Name}, sa)
