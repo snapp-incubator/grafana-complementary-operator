@@ -115,10 +115,13 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		name := secret.Annotations[corev1.ServiceAccountNameKey]
 		uid := secret.Annotations[corev1.ServiceAccountUIDKey]
 		tokenData := secret.Data[corev1.ServiceAccountTokenKey]
+		//tmp
 		logger.Info("token data", "token", string(tokenData))
+		logger.Info("token meta", "name", name, "uid", uid, "ref.Name", ref.Name, "ref.UID", ref.UID)
 		if name == ref.Name && uid == string(ref.UID) && len(tokenData) > 0 {
 			// found token, the first token found is used
 			token = string(tokenData)
+			logger.Info("Found token", "token", token)
 			break
 		}
 
