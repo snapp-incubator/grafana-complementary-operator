@@ -173,6 +173,7 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.Namespace{}).
+		Owns(&grafanav1alpha1.GrafanaDataSource{}).
 		Complete(r)
 }
 
