@@ -30,6 +30,10 @@ export IMG=ghcr.io/your-repo-path/image-name:latest
 
 * `make undeploy` delete resouces in k8s.
 
+### Release
+
+* `make changelog` generate changelog to check before release
+* `make release` create a new tag and release it to github
 
 ## Metrics
 
