@@ -231,3 +231,23 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+
+
+
+#############
+##@ Release
+
+
+.PHONY: changelog
+changelog: build ## Generate changelog
+	echo $(VERSION)
+	git-chglog --next-tag $(VERSION) -o CHANGELOG.md
+
+.PHONY: release
+release: changelog   ## Release a new tag
+	git add CHANGELOG.md
+	git commit -m "chore: update changelog for $(VERSION)"
+	git tag $(VERSION) -m "$(VERSION)"
+	git push origin main $(VERSION)
+

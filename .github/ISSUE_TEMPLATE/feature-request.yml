@@ -1,0 +1,27 @@
+name: ✨ Enhancement
+description: Feature Request or Enhancement Proposal
+title: "[Enhancement]: "
+labels: ["enhancement"]
+assignees:
+  - m-yosefpor # TODO
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your suggestion. We try our best to prioritize it!
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What's your proposal?
+      description: Also tell us, how do you think it should be implemented?
+      placeholder: Tell us your proposal!
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

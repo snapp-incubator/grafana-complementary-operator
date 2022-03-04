@@ -1,0 +1,19 @@
+name: 📝 Question
+description: Question
+title: "[Question]: "
+labels: ["question"]
+assignees:
+  - m-yosefpor # TODO
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question. We try respond ASAP!
+  - type: textarea
+    id: question
+    attributes:
+      label: What's your question?
+      description: What's your question?
+      placeholder: Tell us your question!
+    validations:
+      required: true

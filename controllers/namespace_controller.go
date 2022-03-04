@@ -162,6 +162,12 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		},
 	}
 
+	// Set target Namespace as the owner of GrafanaDatasource in another Namespace
+	err = ctrl.SetControllerReference(ns, grafanaDatasource, r.Scheme)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	logger.Info("creating grafana datasource", "grafanaDatasource.Name", grafanaDatasource.Name)
 	err = r.Create(ctx, grafanaDatasource)
 	if err != nil {
