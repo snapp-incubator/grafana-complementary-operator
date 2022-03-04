@@ -1,9 +1,24 @@
 
+<a name="v0.2.0"></a>
+## [v0.2.0](https://github.com/snapp-incubator/event-exporter/compare/0.0.1...v0.2.0) (2022-03-04)
+
+### Feat
+
+* add releaser
+
+### Fix
+
+* add svu version
+* trigger on changes on owned object
+* handle object already exits
+
+
 <a name="0.0.1"></a>
 ## [0.0.1](https://github.com/snapp-incubator/event-exporter/compare/v0.1.0...0.0.1) (2022-03-04)
 
 ### Chore
 
+* update changelog for 0.0.1
 * add release files
 
 
