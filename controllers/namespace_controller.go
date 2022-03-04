@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	grafanav1alpha1 "github.com/grafana-operator/grafana-operator/v4/api/integreatly/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -131,19 +132,64 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		logger.Error(fmt.Errorf("did not found service account token for service account %q", sa.Name), "")
 		return ctrl.Result{}, err
 	}
+	gfDs, err := r.generateGfDataSource(req.Name, token, ns)
+	if err != nil {
+		logger.Error(err, "Error generating grafanaDatasource manifest")
+		return ctrl.Result{}, err
+	}
+
+	// Check if grafanaDatasource does not exist and create a new one
+	found := &grafanav1alpha1.GrafanaDataSource{}
+	err = r.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: baseNs}, found)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("creating grafana datasource", "grafanaDatasource.Name", gfDs.Name)
+		err = r.Create(ctx, gfDs)
+		if err != nil {
+			logger.Error(err, "unable to create GrafanaDataSource")
+			return ctrl.Result{}, err
+		}
+		// grafanaDatasource created successfully - return and requeue
+		return ctrl.Result{Requeue: true}, nil
+	} else if err != nil {
+		logger.Error(err, "Failed to get grafanaDatasource")
+		return ctrl.Result{}, err
+	}
+
+	// If GrafanaDatasource already exist, check if it is deeply equal with desrired state
+	if !reflect.DeepEqual(gfDs.Spec, found.Spec) {
+		logger.Info("Updating grafanaDatasource", "grafanaDatasource.Namespace", found.Namespace, "grafanaDatasource.Name", found.Name)
+		found.Spec = gfDs.Spec
+		err := r.Update(ctx, found)
+		if err != nil {
+			logger.Error(err, "Failed to update grafanaDatasource", "grafanaDatasource.Namespace", found.Namespace, "grafanaDatasource.Name", found.Name)
+			return ctrl.Result{}, err
+		}
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&corev1.Namespace{}).
+		Complete(r)
+}
+
+func (r *NamespaceReconciler) generateGfDataSource(name, token string, nsOwner *corev1.Namespace) (*grafanav1alpha1.GrafanaDataSource, error) {
 
 	grafanaDatasource := &grafanav1alpha1.GrafanaDataSource{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      req.Name,
+			Name:      name,
 			Namespace: baseNs,
 		},
 		Spec: grafanav1alpha1.GrafanaDataSourceSpec{
-			Name: req.Name + ".yaml",
+			Name: name + ".yaml",
 			Datasources: []grafanav1alpha1.GrafanaDataSourceFields{{
 				Access:    "proxy",
 				Editable:  false,
 				IsDefault: false,
-				Name:      req.Name,
+				Name:      name,
 				OrgId:     1,
 				Type:      "prometheus",
 				Url:       prometheusURL,
@@ -156,31 +202,17 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 				},
 				SecureJsonData: grafanav1alpha1.GrafanaDataSourceSecureJsonData{
 					HTTPHeaderValue1: "Bearer " + token,
-					HTTPHeaderValue2: req.Name,
+					HTTPHeaderValue2: name,
 				},
 			}},
 		},
 	}
 
 	// Set target Namespace as the owner of GrafanaDatasource in another Namespace
-	err = ctrl.SetControllerReference(ns, grafanaDatasource, r.Scheme)
+	err := ctrl.SetControllerReference(nsOwner, grafanaDatasource, r.Scheme)
 	if err != nil {
-		return ctrl.Result{}, err
+		return nil, err
 	}
 
-	logger.Info("creating grafana datasource", "grafanaDatasource.Name", grafanaDatasource.Name)
-	err = r.Create(ctx, grafanaDatasource)
-	if err != nil {
-		logger.Error(err, "unable to create GrafanaDataSource")
-		return ctrl.Result{}, err
-	}
-
-	return ctrl.Result{}, nil
-}
-
-// SetupWithManager sets up the controller with the Manager.
-func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.Namespace{}).
-		Complete(r)
+	return grafanaDatasource, nil
 }
