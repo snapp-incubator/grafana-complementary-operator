@@ -36,7 +36,7 @@ const (
 	baseNs            = "snappcloud-monitoring"
 	baseSa            = "monitoring-datasource"
 	prometheusURL     = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
-	nsMonitoringLabel = "monitoring-ns"
+	nsMonitoringLabel = "monitoring.snappcloud.io/grafana-datasource"
 )
 
 // NamespaceReconciler reconciles a Namespace object
