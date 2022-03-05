@@ -1,6 +1,22 @@
 
+<a name="v0.2.1"></a>
+## [v0.2.1](https://github.com/snapp-incubator/event-exporter/compare/v0.2.0...v0.2.1) (2022-03-05)
+
+### Chore
+
+* bump kustomize to 0.2.0
+
+### Fix
+
+* change ns label
+
+
 <a name="v0.2.0"></a>
 ## [v0.2.0](https://github.com/snapp-incubator/event-exporter/compare/0.0.1...v0.2.0) (2022-03-04)
+
+### Chore
+
+* update changelog for v0.2.0
 
 ### Feat
 
