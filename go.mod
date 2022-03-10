@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/grafana-operator/grafana-operator/v4 v4.2.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.17.0
+	github.com/onsi/gomega v1.18.1
 	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.23.4
 	k8s.io/client-go v0.23.0
