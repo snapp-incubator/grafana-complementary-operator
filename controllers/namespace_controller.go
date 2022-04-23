@@ -40,9 +40,6 @@ const (
 	prometheusURL     = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
 	nsMonitoringLabel = "monitoring.snappcloud.io/grafana-datasource"
 	teamLabel         = "snappcloud.io/team"
-	// grafanaURL        = "https://grafana.snappgroup.teh-1.snappcloud.io"
-	// grafanaUsername = "admin"
-	// grafanaPassword   = "xAR6WJKrszFBJsnlHCdoeuA2w2Q10y9E7iJ3J46l3Vpk1yigQl"
 )
 
 // Get Grafana URL and PassWord as a env.
