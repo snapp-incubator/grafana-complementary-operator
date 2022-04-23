@@ -38,7 +38,7 @@ spec:
             secretKeyRef:
               name: grafana-operated-dashboard-credentials
               key: grafana-password
-        - name: GRAFANA_ADMIN
+        - name: GRAFANA_USERNAME
           valueFrom:
             secretKeyRef:
               name: grafana-operated-dashboard-credentials
