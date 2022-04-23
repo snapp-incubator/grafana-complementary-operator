@@ -19,9 +19,11 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 
 	grafanav1alpha1 "github.com/grafana-operator/grafana-operator/v4/api/integreatly/v1alpha1"
+	"github.com/grafana-tools/sdk"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,7 +39,13 @@ const (
 	baseSa            = "monitoring-datasource"
 	prometheusURL     = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
 	nsMonitoringLabel = "monitoring.snappcloud.io/grafana-datasource"
+	teamLabel         = "snappcloud.io/team"
 )
+
+// Get Grafana URL and PassWord as a env.
+var grafanaPassword = os.Getenv("GRAFANA_PASSWORD")
+var grafanaUsername = os.Getenv("GRAFANA_USERNAME")
+var grafanaURL = os.Getenv("GRAFANA_URL")
 
 // NamespaceReconciler reconciles a Namespace object
 type NamespaceReconciler struct {
@@ -85,18 +93,25 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
-	logger.Info("Reconciling Namespace", "Namespace.Name", req.NamespacedName)
+	// Ignore namespaces which does not have team label
+	team, ok := ns.Labels[teamLabel]
+	if !ok {
+		logger.Info("Namespace does not have team label. Ignoring", "namespace", ns.Name, "team name ", team)
+		return ctrl.Result{}, nil
+	}
 
-	// getting serviceAccount
+	logger.Info("Reconciling Namespace", "Namespace.Name", req.NamespacedName, "Team", team)
+
+	// Getting serviceAccount
 	logger.Info("Getting serviceAccount", "serviceAccount.Name", baseSa, "Namespace.Name", req.NamespacedName)
 	sa := &corev1.ServiceAccount{}
 	err = r.Get(ctx, types.NamespacedName{Name: baseSa, Namespace: req.Name}, sa)
 	if err != nil {
-		logger.Error(err, "unable to get ServiceAccount")
+		logger.Error(err, "Unable to get ServiceAccount")
 		return ctrl.Result{}, err
 	}
 
-	// getting serviceaccount token
+	// Getting serviceaccount token
 	secret := &corev1.Secret{}
 	var token string
 	for _, ref := range sa.Secrets {
@@ -105,11 +120,11 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// get secret
 		err = r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: req.Name}, secret)
 		if err != nil {
-			logger.Error(err, "unable to get Secret")
+			logger.Error(err, "Unable to get Secret")
 			return ctrl.Result{}, err
 		}
 
-		// check if secret is a token for the serviceaccount
+		// Check if secret is a token for the serviceaccount
 		if secret.Type != corev1.SecretTypeServiceAccountToken {
 			continue
 		}
@@ -117,8 +132,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		uid := secret.Annotations[corev1.ServiceAccountUIDKey]
 		tokenData := secret.Data[corev1.ServiceAccountTokenKey]
 		//tmp
-		logger.Info("token data", "token", string(tokenData))
-		logger.Info("token meta", "name", name, "uid", uid, "ref.Name", ref.Name, "ref.UID", ref.UID)
+		logger.Info("Token data", "token", string(tokenData))
+		logger.Info("Token meta", "name", name, "uid", uid, "ref.Name", ref.Name, "ref.UID", ref.UID)
 		if name == sa.Name && uid == string(sa.UID) && len(tokenData) > 0 {
 			// found token, the first token found is used
 			token = string(tokenData)
@@ -132,7 +147,7 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		logger.Error(fmt.Errorf("did not found service account token for service account %q", sa.Name), "")
 		return ctrl.Result{}, err
 	}
-	gfDs, err := r.generateGfDataSource(req.Name, token, ns)
+	gfDs, err := r.generateGfDataSource(ctx, req.Name, team, token, ns)
 	if err != nil {
 		logger.Error(err, "Error generating grafanaDatasource manifest")
 		return ctrl.Result{}, err
@@ -142,10 +157,10 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	found := &grafanav1alpha1.GrafanaDataSource{}
 	err = r.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: baseNs}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("creating grafana datasource", "grafanaDatasource.Name", gfDs.Name)
+		logger.Info("Creating grafana datasource", "grafanaDatasource.Name", gfDs.Name)
 		err = r.Create(ctx, gfDs)
 		if err != nil {
-			logger.Error(err, "unable to create GrafanaDataSource")
+			logger.Error(err, "Unable to create GrafanaDataSource")
 			return ctrl.Result{}, err
 		}
 		// grafanaDatasource created successfully - return and requeue
@@ -177,8 +192,22 @@ func (r *NamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *NamespaceReconciler) generateGfDataSource(name, token string, nsOwner *corev1.Namespace) (*grafanav1alpha1.GrafanaDataSource, error) {
+func (r *NamespaceReconciler) generateGfDataSource(ctx context.Context, name, team, token string, nsOwner *corev1.Namespace) (*grafanav1alpha1.GrafanaDataSource, error) {
+	logger := log.FromContext(ctx)
 
+	// Connecting to the Grafana API
+	client, _ := sdk.NewClient(grafanaURL, fmt.Sprintf("%s:%s", grafanaUsername, grafanaPassword), sdk.DefaultHTTPClient)
+
+	// Retrieving the Organization Info
+	retrievedOrg, err := client.GetOrgByOrgName(ctx, team)
+	if err != nil {
+		logger.Error(err, "Failed to retrieve the organization", "Team name:", team, "Namespace", name)
+	}
+	if retrievedOrg.Name != team {
+		logger.Error(err, "Got wrong org:", "got", retrievedOrg.Name, "expected", team)
+	}
+	// Generating the datasource
+	logger.Info("Start creating Datasource", "Team name:", team, "Team ID:", retrievedOrg.ID, "Namespace", name)
 	grafanaDatasource := &grafanav1alpha1.GrafanaDataSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -191,7 +220,7 @@ func (r *NamespaceReconciler) generateGfDataSource(name, token string, nsOwner *
 				Editable:  false,
 				IsDefault: false,
 				Name:      name,
-				OrgId:     1,
+				OrgId:     int(retrievedOrg.ID),
 				Type:      "prometheus",
 				Url:       prometheusURL,
 				Version:   1,
@@ -210,7 +239,7 @@ func (r *NamespaceReconciler) generateGfDataSource(name, token string, nsOwner *
 	}
 
 	// Set target Namespace as the owner of GrafanaDatasource in another Namespace
-	err := ctrl.SetControllerReference(nsOwner, grafanaDatasource, r.Scheme)
+	err = ctrl.SetControllerReference(nsOwner, grafanaDatasource, r.Scheme)
 	if err != nil {
 		return nil, err
 	}
