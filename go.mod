@@ -3,7 +3,7 @@ module github.com/snapp-cab/grafana-complementary-operator
 go 1.17
 
 require (
-	github.com/grafana-operator/grafana-operator/v4 v4.2.0
+	github.com/grafana-operator/grafana-operator/v4 v4.3.0
 	github.com/grafana-tools/sdk v0.0.0-20220402173226-77f22ba83269
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
