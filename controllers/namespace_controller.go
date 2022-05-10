@@ -200,8 +200,22 @@ func (r *NamespaceReconciler) generateGfDataSource(ctx context.Context, name, te
 
 	// Retrieving the Organization Info
 	retrievedOrg, err := client.GetOrgByOrgName(ctx, team)
-	if err != nil {
-		logger.Error(err, "Failed to retrieve the organization", "Team name:", team, "Namespace", name)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Creating organization", "Team name:", team)
+		// Create the organization
+		neworg := sdk.Org{Name: team}
+		logger.Info("Getting organization name", "organization name is:", neworg.Name, "organization name is:", neworg.ID)
+		_, err := client.CreateOrg(ctx, neworg)
+		retrievedOrg = neworg
+		if err != nil {
+			logger.Error(err, "Failed to create organization")
+			return nil, err
+		} else {
+			logger.Info("Organization created", "Team name:", team)
+		}
+	} else if err != nil {
+		logger.Error(err, "Failed to retrieve organization")
+		return nil, err
 	}
 	if retrievedOrg.Name != team {
 		logger.Error(err, "Got wrong org:", "got", retrievedOrg.Name, "expected", team)
