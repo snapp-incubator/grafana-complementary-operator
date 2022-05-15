@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 
 	grafanav1alpha1 "github.com/grafana-operator/grafana-operator/v4/api/integreatly/v1alpha1"
 	"github.com/grafana-tools/sdk"
@@ -200,23 +201,21 @@ func (r *NamespaceReconciler) generateGfDataSource(ctx context.Context, name, te
 
 	// Retrieving the Organization Info
 	retrievedOrg, err := client.GetOrgByOrgName(ctx, team)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			logger.Error(err, "Organization not found", "organization", team)
-		}
+	if err != nil && strings.Contains(err.Error(), "Organization not found") {
 		logger.Info("Creating organization", "team name is", team)
 		// Create the organization
 		neworg := sdk.Org{Name: team}
 		_, err := client.CreateOrg(ctx, neworg)
-		retrievedOrg = neworg
-		logger.Info("Organization created", "for team", team, "organization name is", retrievedOrg.Name)
+
 		if err != nil {
 			logger.Error(err, "Failed to create organization")
 			return nil, err
 		}
-	}
-	if retrievedOrg.Name != team {
-		logger.Error(err, "wrong org:", "got", retrievedOrg.Name, "expected", team)
+		retrievedOrg = neworg
+		logger.Info("Organization created", "for team", team, "organization name is", retrievedOrg.Name)
+	} else {
+		logger.Error(err, "Unable to get organization")
+		return nil, err
 	}
 	// Generating the datasource
 	logger.Info("Start creating Datasource", "Team name:", team, "Team ID:", retrievedOrg.ID, "Namespace", name)
