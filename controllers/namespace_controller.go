@@ -209,6 +209,7 @@ func (r *NamespaceReconciler) generateGfDataSource(ctx context.Context, name, te
 		if strings.Contains(err.Error(), "Organization not found") {
 			logger.Info("Creating organization", "team name is", team)
 			// Create the organization
+
 			neworg := sdk.Org{Name: team}
 			_, err := client.CreateOrg(ctx, neworg)
 
