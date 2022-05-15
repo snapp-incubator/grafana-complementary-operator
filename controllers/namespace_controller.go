@@ -197,25 +197,31 @@ func (r *NamespaceReconciler) generateGfDataSource(ctx context.Context, name, te
 	logger := log.FromContext(ctx)
 
 	// Connecting to the Grafana API
-	client, _ := sdk.NewClient(grafanaURL, fmt.Sprintf("%s:%s", grafanaUsername, grafanaPassword), sdk.DefaultHTTPClient)
+	client, err := sdk.NewClient(grafanaURL, fmt.Sprintf("%s:%s", grafanaUsername, grafanaPassword), sdk.DefaultHTTPClient)
+	if err != nil {
+		logger.Error(err, "Unable to create Grafana client")
+		return nil, err
+	}
 
 	// Retrieving the Organization Info
 	retrievedOrg, err := client.GetOrgByOrgName(ctx, team)
-	if err != nil && strings.Contains(err.Error(), "Organization not found") {
-		logger.Info("Creating organization", "team name is", team)
-		// Create the organization
-		neworg := sdk.Org{Name: team}
-		_, err := client.CreateOrg(ctx, neworg)
+	if err != nil {
+		if strings.Contains(err.Error(), "Organization not found") {
+			logger.Info("Creating organization", "team name is", team)
+			// Create the organization
+			neworg := sdk.Org{Name: team}
+			_, err := client.CreateOrg(ctx, neworg)
 
-		if err != nil {
-			logger.Error(err, "Failed to create organization")
+			if err != nil {
+				logger.Error(err, "Failed to create organization")
+				return nil, err
+			}
+			retrievedOrg = neworg
+			logger.Info("Organization created", "for team", team, "organization name is", retrievedOrg.Name)
+		} else {
+			logger.Error(err, "Unable to get organization")
 			return nil, err
 		}
-		retrievedOrg = neworg
-		logger.Info("Organization created", "for team", team, "organization name is", retrievedOrg.Name)
-	} else {
-		logger.Error(err, "Unable to get organization")
-		return nil, err
 	}
 	// Generating the datasource
 	logger.Info("Start creating Datasource", "Team name:", team, "Team ID:", retrievedOrg.ID, "Namespace", name)
