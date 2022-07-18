@@ -1,6 +1,7 @@
 domain: snappcloud.io
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
@@ -12,4 +13,13 @@ resources:
   kind: Namespace
   path: k8s.io/api/core/v1
   version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: snappcloud.io
+  group: grafanauser
+  kind: GrafanaUser
+  path: github.com/snapp-cab/grafana-complementary-operator/apis/grafanauser/v1alpha1
+  version: v1alpha1
 version: "3"

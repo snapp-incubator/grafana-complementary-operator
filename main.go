@@ -32,7 +32,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/snapp-cab/grafana-complementary-operator/controllers"
+	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafanauser/v1alpha1"
+	grafanausercontrollers "github.com/snapp-cab/grafana-complementary-operator/controllers/grafanauser"
+	namesapcecontrollers "github.com/snapp-cab/grafana-complementary-operator/controllers/namespace"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -45,6 +47,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(grafanav1alpha1.AddToScheme(scheme))
+	utilruntime.Must(grafanauserv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -78,11 +81,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.NamespaceReconciler{
+	if err = (&namesapcecontrollers.NamespaceReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Namespace")
+		os.Exit(1)
+	}
+	if err = (&grafanausercontrollers.GrafanaUserReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "GrafanaUser")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

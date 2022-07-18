@@ -1,0 +1,12 @@
+apiVersion: grafanauser.snappcloud.io/v1alpha1
+kind: GrafanaUser
+metadata:
+  name: grafanauser-sample
+  namespace: test
+spec:
+  admin:
+  - user1
+  view:
+  - user2
+  edit:
+  - user3
