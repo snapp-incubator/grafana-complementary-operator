@@ -1,0 +1,24 @@
+# permissions for end users to edit grafanausers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafanauser-editor-role
+rules:
+- apiGroups:
+  - grafanauser.snappcloud.io
+  resources:
+  - grafanausers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - grafanauser.snappcloud.io
+  resources:
+  - grafanausers/status
+  verbs:
+  - get

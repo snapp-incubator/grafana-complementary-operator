@@ -8,6 +8,30 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - namespaces
   verbs:
   - get
@@ -44,9 +68,47 @@ rules:
   - list
   - watch
 - apiGroups:
+  - grafana.snappcloud.io
+  resources:
+  - grafanas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - grafana.snappcloud.io
+  resources:
+  - grafanas/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - grafana.snappcloud.io
+  resources:
+  - grafanas/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - integreatly.org
   resources:
   - grafanadatasources
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - user.openshift.io
+  resources:
+  - '*'
   verbs:
   - create
   - delete
