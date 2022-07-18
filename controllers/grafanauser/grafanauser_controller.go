@@ -85,9 +85,19 @@ func (r *GrafanaUserReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	}
 
-	r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Admin, "admin")
-	r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Edit, "editor")
-	r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.View, "viewer")
+	_, err1 := r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Admin, "admin")
+	if err1 != nil {
+		return ctrl.Result{}, err1
+	}
+
+	_, err2 := r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Edit, "editor")
+	if err2 != nil {
+		return ctrl.Result{}, err2
+	}
+	_, err3 := r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.View, "viewer")
+	if err3 != nil {
+		return ctrl.Result{}, err3
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -133,7 +143,7 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 					newuser := sdk.UserRole{LoginOrEmail: email, Role: role}
 					_, err := client.AddOrgUser(ctx, newuser, orgID)
 					if err != nil {
-						log.Error(err, "Failed to add", user.Name, "to", orgName)
+						return ctrl.Result{}, err
 					} else {
 						log.Info(UserEmail, "is added to", orgName)
 					}
