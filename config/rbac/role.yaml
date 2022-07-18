@@ -68,9 +68,9 @@ rules:
   - list
   - watch
 - apiGroups:
-  - grafana.snappcloud.io
+  - grafanauser.snappcloud.io
   resources:
-  - grafanas
+  - grafanauser
   verbs:
   - create
   - delete
@@ -80,15 +80,15 @@ rules:
   - update
   - watch
 - apiGroups:
-  - grafana.snappcloud.io
+  - grafanauser.snappcloud.io
   resources:
-  - grafanas/finalizers
+  - grafanauser/finalizers
   verbs:
   - update
 - apiGroups:
-  - grafana.snappcloud.io
+  - grafanauser.snappcloud.io
   resources:
-  - grafanas/status
+  - grafanauser/status
   verbs:
   - get
   - patch
