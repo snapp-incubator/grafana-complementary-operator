@@ -85,18 +85,18 @@ func (r *GrafanaUserReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	}
 
-	_, err1 := r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Admin, "admin")
-	if err1 != nil {
-		return ctrl.Result{}, err1
+	_, err = r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Admin, "admin")
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
-	_, err2 := r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Edit, "editor")
-	if err2 != nil {
-		return ctrl.Result{}, err2
+	_, err = r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.Edit, "editor")
+	if err != nil {
+		return ctrl.Result{}, err
 	}
-	_, err3 := r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.View, "viewer")
-	if err3 != nil {
-		return ctrl.Result{}, err3
+	_, err = r.AddUsersToGrafanaOrgByEmail(ctx, req, grafana.Spec.View, "viewer")
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -119,8 +119,8 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 	orgName := retrievedOrg.Name
 	getallUser, _ := client.GetAllUsers(ctx)
 	getuserOrg, _ := client.GetOrgUsers(ctx, orgID)
-	if err1 != nil {
-		log.Error(err1, "Unable to create Grafana client")
+	if err != nil {
+		log.Error(err, "Unable to create Grafana client")
 		reqLogger.Info("test")
 		return ctrl.Result{}, err1
 	} else {
