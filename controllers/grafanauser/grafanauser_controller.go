@@ -49,9 +49,9 @@ type GrafanaUserReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=grafana.snappcloud.io,resources=grafanas,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=grafana.snappcloud.io,resources=grafanas/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=grafana.snappcloud.io,resources=grafanas/finalizers,verbs=update
+//+kubebuilder:rbac:groups=grafanauser.snappcloud.io,resources=grafanausers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=grafanauser.snappcloud.io,resources=grafanausers/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=grafanauser.snappcloud.io,resources=grafanausers/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=user.openshift.io,resources=*,verbs=get;list;watch;create;update;patch;delete

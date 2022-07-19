@@ -70,7 +70,7 @@ rules:
 - apiGroups:
   - grafanauser.snappcloud.io
   resources:
-  - grafanauser
+  - grafanausers
   verbs:
   - create
   - delete
@@ -82,13 +82,13 @@ rules:
 - apiGroups:
   - grafanauser.snappcloud.io
   resources:
-  - grafanauser/finalizers
+  - grafanausers/finalizers
   verbs:
   - update
 - apiGroups:
   - grafanauser.snappcloud.io
   resources:
-  - grafanauser/status
+  - grafanausers/status
   verbs:
   - get
   - patch
