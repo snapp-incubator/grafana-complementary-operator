@@ -65,6 +65,7 @@ var _ webhook.Validator = &GrafanaUser{}
 func (r *GrafanaUser) ValidateCreate() error {
 	grafanauserlog.Info("validate create", "name", r.Name)
 	// TODO(user): fill in your validation logic upon object creation.
+	fmt.Println("slm khoib")
 	var emaillist []string
 	emaillist = append(r.Spec.Admin, r.Spec.Edit...)
 	emaillist = append(emaillist, r.Spec.View...)
@@ -101,6 +102,7 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 	grafanalUsers, _ := client.GetAllUsers(ctx)
 	var Users []string
 	for _, email := range emails {
+		fmt.Println("2")
 		for _, grafanauser := range grafanalUsers {
 			Grafanau := grafanauser.Email
 			if email == Grafanau {
