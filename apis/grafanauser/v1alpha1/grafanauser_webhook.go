@@ -23,6 +23,7 @@ import (
 	"github.com/grafana-tools/sdk"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -65,7 +66,9 @@ var _ webhook.Validator = &GrafanaUser{}
 func (r *GrafanaUser) ValidateCreate() error {
 	grafanauserlog.Info("validate create", "name", r.Name)
 	// TODO(user): fill in your validation logic upon object creation.
-	fmt.Println("slm khoib")
+	log := log.FromContext(context.Background())
+	reqLogger := log.WithName("sina")
+	reqLogger.Info("test")
 	var emaillist []string
 	emaillist = append(r.Spec.Admin, r.Spec.Edit...)
 	emaillist = append(emaillist, r.Spec.View...)
@@ -118,5 +121,5 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 		return fmt.Errorf("please make sure all of the user are login")
 
 	}
-	return nil
+	return fmt.Errorf("sl")
 }
