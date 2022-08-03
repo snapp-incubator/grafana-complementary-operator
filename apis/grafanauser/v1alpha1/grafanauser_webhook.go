@@ -113,7 +113,7 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 			} else {
 				grafanauserlog.Info("slm_else")
 				grafanauserlog.Info(Grafanau)
-				Users = append(Users, Grafanau)
+				Users = append(Users, email)
 
 			}
 
