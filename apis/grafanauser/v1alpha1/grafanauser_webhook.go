@@ -17,8 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/grafana-tools/sdk"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -29,6 +31,9 @@ import (
 var grafanauserlog = logf.Log.WithName("grafanauser-resource")
 
 // Get Grafana URL and PassWord as a env.
+var grafanaPassword = "xAR6WJKrszFBJsnlHCdoeuA2w2Q10y9E7iJ3J46l3Vpk1yigQl"
+var grafanaUsername = "admin"
+var grafanaURL = "https://grafana.okd4.teh-1.snappcloud.io"
 
 // Get Grafana URL and PassWord as a env.
 
@@ -59,21 +64,27 @@ var _ webhook.Validator = &GrafanaUser{}
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *GrafanaUser) ValidateCreate() error {
 	grafanauserlog.Info("validate create", "name", r.Name)
-	if err := r.ValidateSopsSecret(); err != nil {
+	// TODO(user): fill in your validation logic upon object creation.
+	var emaillist []string
+	emaillist = append(r.Spec.Admin, r.Spec.Edit...)
+	emaillist = append(emaillist, r.Spec.View...)
+	err := r.ValidateEmailExist(context.Background(), emaillist)
+	if err != nil {
 		return err
 	}
-
-	// TODO(user): fill in your validation logic upon object update.
 	return nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *GrafanaUser) ValidateUpdate(old runtime.Object) error {
 	grafanauserlog.Info("validate update", "name", r.Name)
-	if err := r.ValidateSopsSecret(); err != nil {
+	var emaillist []string
+	emaillist = append(r.Spec.Admin, r.Spec.Edit...)
+	emaillist = append(emaillist, r.Spec.View...)
+	err := r.ValidateEmailExist(context.Background(), emaillist)
+	if err != nil {
 		return err
 	}
-
 	// TODO(user): fill in your validation logic upon object update.
 	return nil
 }
@@ -85,9 +96,25 @@ func (r *GrafanaUser) ValidateDelete() error {
 	return nil
 }
 
-func (r *GrafanaUser) ValidateSopsSecret() error {
-	if len(r.Spec.Admin) <= 1 {
-		return fmt.Errorf("slm")
+func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) error {
+	client, _ := sdk.NewClient(grafanaURL, fmt.Sprintf("%s:%s", grafanaUsername, grafanaPassword), sdk.DefaultHTTPClient)
+	grafanalUsers, _ := client.GetAllUsers(ctx)
+	var Users []string
+	for _, email := range emails {
+		for _, grafanauser := range grafanalUsers {
+			Grafanau := grafanauser.Email
+			if email == Grafanau {
+				break
+			} else {
+				Users = append(Users, Grafanau)
+
+			}
+
+		}
+	}
+	if len(Users) == 0 {
+		return fmt.Errorf("please make sure all of the user are login")
+
 	}
 	return nil
 }
