@@ -120,7 +120,7 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 	}
 	userlist := strings.Join(Users, ", ")
 	if len(Users) > 0 {
-		return fmt.Errorf("Some of the Users does NOT login to grafan pelase ask them to login first and then apply again. The list is %q", userlist)
+		return fmt.Errorf("%q do NOT exist in grafana, please make sure the user name is correct, or they have login at least one time in grafana and then try again", userlist)
 
 	}
 	return nil
