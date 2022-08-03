@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/grafana-tools/sdk"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,6 +69,8 @@ func (r *GrafanaUser) ValidateCreate() error {
 	var emaillist []string
 	emaillist = append(r.Spec.Admin, r.Spec.Edit...)
 	emaillist = append(emaillist, r.Spec.View...)
+	str2 := strings.Join(emaillist, ", ")
+	grafanauserlog.Info(str2)
 	err := r.ValidateEmailExist(context.Background(), emaillist)
 	if err != nil {
 		return err
@@ -104,15 +107,21 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 		for _, grafanauser := range grafanalUsers {
 			Grafanau := grafanauser.Email
 			if email == Grafanau {
+				grafanauserlog.Info("slm_if")
+				grafanauserlog.Info(Grafanau)
 				break
 			} else {
+				grafanauserlog.Info("slm_else")
+				grafanauserlog.Info(Grafanau)
 				Users = append(Users, Grafanau)
 
 			}
 
 		}
 	}
-	if len(Users) == 0 {
+	str2 := strings.Join(Users, ", ")
+	grafanauserlog.Info(str2)
+	if len(Users) > 0 {
 		return fmt.Errorf("please make sure all of the user are login")
 
 	}
