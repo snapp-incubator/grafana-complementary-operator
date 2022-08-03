@@ -108,12 +108,8 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 		for _, grafanauser := range grafanalUsers {
 			Grafanau := grafanauser.Email
 			if email != Grafanau {
-				grafanauserlog.Info("slm_if")
-				grafanauserlog.Info(Grafanau)
 				orguserfound = true
 			} else {
-				grafanauserlog.Info("slm_else")
-				grafanauserlog.Info(Grafanau)
 				orguserfound = false
 				break
 			}
@@ -122,10 +118,9 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 			Users = append(Users, email)
 		}
 	}
-	str2 := strings.Join(Users, ", ")
-	grafanauserlog.Info(str2)
+	userlist := strings.Join(Users, ", ")
 	if len(Users) > 0 {
-		return fmt.Errorf("please make sure all of the user are login")
+		return fmt.Errorf("Some of the Users does NOT login to grafan pelase ask them to login first and then apply again. The list is %v", userlist)
 
 	}
 	return nil
