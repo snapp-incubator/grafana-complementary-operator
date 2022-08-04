@@ -107,11 +107,11 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 			Grafanau := grafanauser.Email
 			found = false
 			if email == Grafanau {
-				found = false
+				found = true
 				break
 			}
 		}
-		if found == false {
+		if !found {
 			Users = append(Users, email)
 		}
 	}
