@@ -1,0 +1,28 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-grafana-snappcloud-io-v1alpha1-grafanauser
+  failurePolicy: Fail
+  name: vgrafana.kb.io
+  rules:
+  - apiGroups:
+    - grafana.snappcloud.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - grafanausers
+  sideEffects: None
