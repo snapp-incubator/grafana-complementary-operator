@@ -102,18 +102,16 @@ func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) e
 	client, _ := sdk.NewClient(grafanaURL, fmt.Sprintf("%s:%s", grafanaUsername, grafanaPassword), sdk.DefaultHTTPClient)
 	grafanalUsers, _ := client.GetAllUsers(ctx)
 	var Users []string
-	var orguserfound bool
+	var found bool
 	for _, email := range emails {
 		for _, grafanauser := range grafanalUsers {
-			Grafanau := grafanauser.Email
-			if email != Grafanau {
-				orguserfound = true
-			} else {
-				orguserfound = false
+			found = false
+			if email == grafanauser.Email {
+				found = true
 				break
 			}
 		}
-		if orguserfound {
+		if !found {
 			Users = append(Users, email)
 		}
 	}
