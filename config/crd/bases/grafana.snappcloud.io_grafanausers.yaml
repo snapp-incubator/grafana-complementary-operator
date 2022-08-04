@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: grafanausers.grafanauser.snappcloud.io
+  name: grafanausers.grafana.snappcloud.io
 spec:
-  group: grafanauser.snappcloud.io
+  group: grafana.snappcloud.io
   names:
     kind: GrafanaUser
     listKind: GrafanaUserList

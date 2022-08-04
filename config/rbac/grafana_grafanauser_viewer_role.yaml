@@ -5,7 +5,7 @@ metadata:
   name: grafanauser-viewer-role
 rules:
 - apiGroups:
-  - grafanauser.snappcloud.io
+  - grafana.snappcloud.io
   resources:
   - grafanausers
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - grafanauser.snappcloud.io
+  - grafana.snappcloud.io
   resources:
   - grafanausers/status
   verbs:

@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafanauser/v1alpha1"
+	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafana/v1alpha1"
 	grafanausercontrollers "github.com/snapp-cab/grafana-complementary-operator/controllers/grafanauser"
 	namesapcecontrollers "github.com/snapp-cab/grafana-complementary-operator/controllers/namespace"
 	//+kubebuilder:scaffold:imports
@@ -93,6 +93,10 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GrafanaUser")
+		os.Exit(1)
+	}
+	if err = (&grafanauserv1alpha1.GrafanaUser{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "GrafanaUser")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
