@@ -98,19 +98,21 @@ func (r *GrafanaUser) ValidateDelete() error {
 	return nil
 }
 
+func Find(slice []sdk.User, val string) bool {
+	for _, item := range slice {
+		if item.Email == val {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *GrafanaUser) ValidateEmailExist(ctx context.Context, emails []string) error {
 	client, _ := sdk.NewClient(grafanaURL, fmt.Sprintf("%s:%s", grafanaUsername, grafanaPassword), sdk.DefaultHTTPClient)
 	grafanalUsers, _ := client.GetAllUsers(ctx)
 	var Users []string
-	var found bool
 	for _, email := range emails {
-		for _, grafanauser := range grafanalUsers {
-			found = false
-			if email == grafanauser.Email {
-				found = true
-				break
-			}
-		}
+		found := Find(grafanalUsers, email)
 		if !found {
 			Users = append(Users, email)
 		}
