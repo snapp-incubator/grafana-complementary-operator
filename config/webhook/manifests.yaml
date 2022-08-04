@@ -1,33 +1,5 @@
 ---
 apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingWebhookConfiguration
-metadata:
-  creationTimestamp: null
-  name: mutating-webhook-configuration
-webhooks:
-- admissionReviewVersions:
-  - v1
-  - v1beta1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /mutate-grafanauser-snappcloud-io-v1alpha1-grafanauser
-  failurePolicy: Fail
-  name: mgrafanauser.kb.io
-  rules:
-  - apiGroups:
-    - grafanauser.snappcloud.io
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - grafanausers
-  sideEffects: None
----
-apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   creationTimestamp: null
@@ -40,12 +12,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-grafanauser-snappcloud-io-v1alpha1-grafanauser
+      path: /validate-grafana-snappcloud-io-v1alpha1-grafanauser
   failurePolicy: Fail
-  name: vgrafanauser.kb.io
+  name: vgrafana.kb.io
   rules:
   - apiGroups:
-    - grafanauser.snappcloud.io
+    - grafana.snappcloud.io
     apiVersions:
     - v1alpha1
     operations:

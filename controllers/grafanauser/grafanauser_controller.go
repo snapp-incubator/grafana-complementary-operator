@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/grafana-tools/sdk"
-	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafanauser/v1alpha1"
+	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafana/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -50,9 +50,9 @@ type GrafanaUserReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=grafanauser.snappcloud.io,resources=grafanausers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=grafanauser.snappcloud.io,resources=grafanausers/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=grafanauser.snappcloud.io,resources=grafanausers/finalizers,verbs=update
+//+kubebuilder:rbac:groups=grafana.snappcloud.io,resources=grafanausers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=grafanaa.snappcloud.io,resources=grafanausers/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=grafana.snappcloud.io,resources=grafanausers/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=user.openshift.io,resources=*,verbs=get;list;watch;create;update;patch;delete
@@ -66,6 +66,7 @@ type GrafanaUserReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
+
 func (r *GrafanaUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	reqLogger := log.WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)

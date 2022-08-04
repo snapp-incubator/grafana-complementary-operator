@@ -36,7 +36,7 @@ type GrafanaUserSpec struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// GrafanaUser is the Schema for the grafanausers API
+// GrafanaUser is the Schema for the grafana API
 type GrafanaUser struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

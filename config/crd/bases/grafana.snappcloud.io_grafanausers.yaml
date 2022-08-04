@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: grafanausers.grafanauser.snappcloud.io
+  name: grafanausers.grafana.snappcloud.io
 spec:
-  group: grafanauser.snappcloud.io
+  group: grafana.snappcloud.io
   names:
     kind: GrafanaUser
     listKind: GrafanaUserList
@@ -18,7 +18,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: GrafanaUser is the Schema for the grafanausers API
+        description: GrafanaUser is the Schema for the grafana API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation

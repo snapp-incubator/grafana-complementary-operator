@@ -2,10 +2,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: grafanauser-viewer-role
+  name: grafana-viewer-role
 rules:
 - apiGroups:
-  - grafanauser.snappcloud.io
+  - grafana.snappcloud.io
   resources:
   - grafanausers
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - grafanauser.snappcloud.io
+  - grafana.snappcloud.io
   resources:
   - grafanausers/status
   verbs:

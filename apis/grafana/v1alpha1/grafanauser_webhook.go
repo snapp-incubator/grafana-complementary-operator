@@ -46,8 +46,6 @@ func (r *GrafanaUser) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-//+kubebuilder:webhook:path=/mutate-grafanauser-snappcloud-io-v1alpha1-grafanauser,mutating=true,failurePolicy=fail,sideEffects=None,groups=grafanauser.snappcloud.io,resources=grafanausers,verbs=create;update,versions=v1alpha1,name=mgrafanauser.kb.io,admissionReviewVersions={v1,v1beta1}
-
 var _ webhook.Defaulter = &GrafanaUser{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
@@ -58,7 +56,7 @@ func (r *GrafanaUser) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-grafanauser-snappcloud-io-v1alpha1-grafanauser,mutating=false,failurePolicy=fail,sideEffects=None,groups=grafanauser.snappcloud.io,resources=grafanausers,verbs=create;update,versions=v1alpha1,name=vgrafanauser.kb.io,admissionReviewVersions={v1,v1beta1}
+//+kubebuilder:webhook:path=/validate-grafana-snappcloud-io-v1alpha1-grafanauser,mutating=false,failurePolicy=fail,sideEffects=None,groups=grafana.snappcloud.io,resources=grafanausers,verbs=create;update,versions=v1alpha1,name=vgrafana.kb.io,admissionReviewVersions={v1,v1beta1}
 
 var _ webhook.Validator = &GrafanaUser{}
 

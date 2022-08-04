@@ -29,7 +29,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafanauser/v1alpha1"
+	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafana/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
