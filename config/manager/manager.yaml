@@ -24,7 +24,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: ghcr.io/snapp-incubator/grafana-complementary-operator:0.6.0
+        image: ghcr.io/snapp-incubator/grafana-complementary-operator:0.7.0
         env:
         - name: GRAFANA_PASSWORD
           valueFrom:
