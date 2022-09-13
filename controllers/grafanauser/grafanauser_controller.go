@@ -144,6 +144,7 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 				UserID := orguser.ID
 				orguserfound = true
 				if role != UserRole {
+					reqLogger.Info(email)
 					changerole := sdk.UserRole{LoginOrEmail: email, Role: role}
 					client.UpdateOrgUser(ctx, changerole, UserID, orgID)
 					reqLogger.Info(orguser.Email, "is already in", orgName, "but the user role change to", role)
