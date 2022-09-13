@@ -24,23 +24,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: ghcr.io/snapp-incubator/grafana-complementary-operator:0.7.0
-        env:
-        - name: GRAFANA_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: grafana-operated-dashboard-credentials
-              key: grafana-password
-        - name: GRAFANA_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: grafana-operated-dashboard-credentials
-              key: grafana-username
-        - name: GRAFANA_URL
-          valueFrom:
-            configMapKeyRef:
-              name: grafana-complementary-config
-              key: grafana-url
+        image: docker.io/sinamcp/grafana:60
         imagePullPolicy: Always
         name: manager
         securityContext:
