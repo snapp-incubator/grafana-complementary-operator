@@ -24,7 +24,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: docker.io/sinamcp/grafana:63
+        image: docker.io/sinamcp/grafana:64
         imagePullPolicy: Always
         name: manager
         securityContext:
