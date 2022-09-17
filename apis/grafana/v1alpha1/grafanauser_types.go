@@ -33,6 +33,12 @@ type GrafanaUserSpec struct {
 	View  []string `json:"view,omitempty"`
 }
 
+// GrafanaUserStatus defines the observed state of TEST
+type GrafanaUserStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+}
+
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
@@ -40,7 +46,8 @@ type GrafanaUserSpec struct {
 type GrafanaUser struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              GrafanaUserSpec `json:"spec,omitempty"`
+	Spec              GrafanaUserSpec   `json:"spec,omitempty"`
+	Status            GrafanaUserStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

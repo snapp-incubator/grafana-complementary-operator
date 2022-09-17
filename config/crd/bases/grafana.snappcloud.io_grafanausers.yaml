@@ -48,6 +48,9 @@ spec:
                   type: string
                 type: array
             type: object
+          status:
+            description: GrafanaUserStatus defines the observed state of TEST
+            type: object
         type: object
     served: true
     storage: true
