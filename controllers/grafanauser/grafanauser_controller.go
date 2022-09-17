@@ -178,8 +178,28 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 				break
 			}
 		}
+		userList := &grafanauserv1alpha1.GrafanaUserList{}
+		for _, g := range userList.Items {
+			found := Find(emails, g.Name)
+			if !found {
+				err := r.Delete(ctx, &g)
+				if err != nil {
+					log.Error(err, "Failed to delete extra gslbContents")
+					return ctrl.Result{}, err
+				}
+			}
+		}
+
 	}
 	return ctrl.Result{}, nil
+}
+func Find(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }
 
 // SetupWithManager sets up the controller with the Manager.
