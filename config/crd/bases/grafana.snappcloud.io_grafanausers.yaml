@@ -50,6 +50,19 @@ spec:
             type: object
           status:
             description: GrafanaUserStatus defines the observed state of TEST
+            properties:
+              admin:
+                items:
+                  type: string
+                type: array
+              edit:
+                items:
+                  type: string
+                type: array
+              view:
+                items:
+                  type: string
+                type: array
             type: object
         type: object
     served: true
