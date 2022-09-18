@@ -154,23 +154,24 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 					reqLogger.Info(orguser.Email, "is already in", orgName, "and the role hasn't changed ")
 				}
 			}
-			// Delete user if is not in user list
-			userList := &grafanauserv1alpha1.GrafanaUserList{}
-			log.Info("aaaa")
-			for _, g := range userList.Items {
-				log.Info("bbbb")
-				if !Find(emails, g.Name) {
-					log.Info("Deleting User")
-					err := r.Delete(ctx, &g)
-					if err != nil {
-						log.Error(err, "Failed to delete user")
-						return ctrl.Result{}, err
-					}
-				}
-				log.Info("Successfully finalized gslb")
-				return ctrl.Result{}, nil
-			}
 		}
+		// Delete user if is not in user list
+		userList := &grafanauserv1alpha1.GrafanaUserList{}
+		log.Info("aaaa")
+		for _, g := range userList.Items {
+			log.Info("bbbb")
+			if !Find(emails, g.Name) {
+				log.Info("Deleting User")
+				err := r.Delete(ctx, &g)
+				if err != nil {
+					log.Error(err, "Failed to delete user")
+					return ctrl.Result{}, err
+				}
+			}
+			log.Info("Successfully finalized gslb")
+			return ctrl.Result{}, nil
+		}
+
 		if orguserfound {
 			continue
 		}
@@ -189,6 +190,7 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 		}
 	}
 	return ctrl.Result{}, nil
+
 }
 
 func Find(slice []string, val string) bool {
