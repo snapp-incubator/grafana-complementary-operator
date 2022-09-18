@@ -156,7 +156,9 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 			}
 			// Delete user if is not in user list
 			userList := &grafanauserv1alpha1.GrafanaUserList{}
+			log.Info("aaaa")
 			for _, g := range userList.Items {
+				log.Info("bbbb")
 				if !Find(emails, g.Name) {
 					log.Info("Deleting User")
 					err := r.Delete(ctx, &g)
