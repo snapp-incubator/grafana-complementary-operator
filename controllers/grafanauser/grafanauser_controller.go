@@ -19,19 +19,18 @@ package grafanauser
 import (
 	"context"
 	"fmt"
-	"os"
+	"strconv"
 	"strings"
 
+	"github.com/grafana-tools/sdk"
+	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafana/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/grafana-tools/sdk"
-	grafanauserv1alpha1 "github.com/snapp-cab/grafana-complementary-operator/apis/grafana/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -39,9 +38,9 @@ const (
 )
 
 // Get Grafana URL and PassWord as a env.
-var grafanaPassword = os.Getenv("GRAFANA_PASSWORD")
-var grafanaUsername = os.Getenv("GRAFANA_USERNAME")
-var grafanaURL = os.Getenv("GRAFANA_URL")
+var grafanaPassword = "xAR6WJKrszFBJsnlHCdoeuA2w2Q10y9E7iJ3J46l3Vpk1yigQl"
+var grafanaUsername = "admin"
+var grafanaURL = "https://grafana.okd4.teh-1.snappcloud.io"
 
 // GrafanaReconciler reconciles a Grafana object
 type GrafanaUserReconciler struct {
@@ -140,8 +139,25 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 		for _, orguser := range getuserOrg {
 			UserOrg := orguser.Email
 			if email == UserOrg {
+				UserRole := orguser.Role
+				UserID := orguser.ID
 				orguserfound = true
-				reqLogger.Info(orguser.Email, "is already in", orgName)
+				if role != UserRole {
+					reqLogger.Info(email)
+					changerole := sdk.UserRole{LoginOrEmail: email, Role: role}
+					status, err := client.UpdateActualOrgUser(ctx, changerole, UserID)
+					if err != nil {
+						return ctrl.Result{}, err
+					} else {
+						reqLogger.Info(*status.Message)
+						reqLogger.Info(orguser.Email, "is already in", orgName, "but the user role change to", role)
+						reqLogger.Info(role)
+						s1 := strconv.FormatInt(int64(UserID), 10)
+						reqLogger.Info(s1)
+					}
+				} else {
+					reqLogger.Info(orguser.Email, "is already in", orgName, "and the role hasn't changed ")
+				}
 				break
 			}
 		}
@@ -161,8 +177,31 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 				break
 			}
 		}
+		// Delete user if is not in user list
+		userList := &grafanauserv1alpha1.GrafanaUserList{}
+		for _, g := range userList.Items {
+			if !Find(emails, g.Name) {
+				log.Info("Deleting User")
+				err := r.Delete(ctx, &g)
+				if err != nil {
+					log.Error(err, "Failed to delete user")
+					return ctrl.Result{}, err
+				}
+			}
+			log.Info("Successfully finalized gslb")
+			return ctrl.Result{}, nil
+		}
 	}
 	return ctrl.Result{}, nil
+}
+
+func Find(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }
 
 // SetupWithManager sets up the controller with the Manager.
