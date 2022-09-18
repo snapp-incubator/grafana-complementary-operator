@@ -137,12 +137,16 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 		var orguserfound bool
 		for _, orguser := range getuserOrg {
 			UserOrg := orguser.Email
+			UserID := orguser.ID
+			if !Find(emails, UserOrg) {
+				client.DeleteOrgUser(ctx, orgID, UserID)
+			}
 			if email == UserOrg {
 				UserRole := orguser.Role
-				UserID := orguser.ID
 				orguserfound = true
 				if role != UserRole {
-					reqLogger.Info(email)
+					reqLogger.Info(role)
+					reqLogger.Info(UserRole)
 					changerole := sdk.UserRole{LoginOrEmail: email, Role: role}
 					_, err := client.UpdateOrgUser(ctx, changerole, orgID, UserID)
 					if err != nil {
@@ -155,23 +159,6 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 				}
 			}
 		}
-		// Delete user if is not in user list
-		userList := &grafanauserv1alpha1.GrafanaUserList{}
-		log.Info("aaaa")
-		for _, g := range userList.Items {
-			log.Info("bbbb")
-			if !Find(emails, g.Name) {
-				log.Info("Deleting User")
-				err := r.Delete(ctx, &g)
-				if err != nil {
-					log.Error(err, "Failed to delete user")
-					return ctrl.Result{}, err
-				}
-			}
-			log.Info("Successfully finalized gslb")
-			return ctrl.Result{}, nil
-		}
-
 		if orguserfound {
 			continue
 		}
