@@ -179,8 +179,11 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 			}
 		}
 		userList := &grafanauserv1alpha1.GrafanaUserList{}
+		log.Info("aaaaaaaa")
 		for _, g := range userList.Items {
+			log.Info("bbbbbb")
 			found := Find(emails, g.Name)
+			log.Info(g.Name)
 			if !found {
 				err := r.Delete(ctx, &g)
 				if err != nil {

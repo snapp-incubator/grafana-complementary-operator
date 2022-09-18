@@ -33,11 +33,8 @@ type GrafanaUserSpec struct {
 	View  []string `json:"view,omitempty"`
 }
 
-// GrafanaUserStatus defines the observed state of TEST
+// GrafanaUserStatus defines the observed state
 type GrafanaUserStatus struct {
-	Admin []string `json:"admin,omitempty"`
-	Edit  []string `json:"edit,omitempty"`
-	View  []string `json:"view,omitempty"`
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
