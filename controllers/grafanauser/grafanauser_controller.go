@@ -19,7 +19,6 @@ package grafanauser
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/grafana-tools/sdk"
@@ -145,20 +144,29 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 				if role != UserRole {
 					reqLogger.Info(email)
 					changerole := sdk.UserRole{LoginOrEmail: email, Role: role}
-					status, err := client.UpdateActualOrgUser(ctx, changerole, UserID)
+					_, err := client.UpdateOrgUser(ctx, changerole, orgID, UserID)
 					if err != nil {
 						return ctrl.Result{}, err
 					} else {
-						reqLogger.Info(*status.Message)
 						reqLogger.Info(orguser.Email, "is already in", orgName, "but the user role change to", role)
-						reqLogger.Info(role)
-						s1 := strconv.FormatInt(int64(UserID), 10)
-						reqLogger.Info(s1)
 					}
 				} else {
 					reqLogger.Info(orguser.Email, "is already in", orgName, "and the role hasn't changed ")
 				}
-				break
+			}
+			// Delete user if is not in user list
+			userList := &grafanauserv1alpha1.GrafanaUserList{}
+			for _, g := range userList.Items {
+				if !Find(emails, g.Name) {
+					log.Info("Deleting User")
+					err := r.Delete(ctx, &g)
+					if err != nil {
+						log.Error(err, "Failed to delete user")
+						return ctrl.Result{}, err
+					}
+				}
+				log.Info("Successfully finalized gslb")
+				return ctrl.Result{}, nil
 			}
 		}
 		if orguserfound {
@@ -176,20 +184,6 @@ func (r *GrafanaUserReconciler) AddUsersToGrafanaOrgByEmail(ctx context.Context,
 				}
 				break
 			}
-		}
-		// Delete user if is not in user list
-		userList := &grafanauserv1alpha1.GrafanaUserList{}
-		for _, g := range userList.Items {
-			if !Find(emails, g.Name) {
-				log.Info("Deleting User")
-				err := r.Delete(ctx, &g)
-				if err != nil {
-					log.Error(err, "Failed to delete user")
-					return ctrl.Result{}, err
-				}
-			}
-			log.Info("Successfully finalized gslb")
-			return ctrl.Result{}, nil
 		}
 	}
 	return ctrl.Result{}, nil
