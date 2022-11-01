@@ -6,9 +6,9 @@ require (
 	github.com/grafana-operator/grafana-operator/v4 v4.6.0
 	github.com/grafana-tools/sdk v0.0.0-20220402173226-77f22ba83269
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.19.0
-	k8s.io/api v0.25.0
-	k8s.io/apimachinery v0.25.0
+	github.com/onsi/gomega v1.20.1
+	k8s.io/api v0.25.3
+	k8s.io/apimachinery v0.25.3
 	k8s.io/client-go v0.25.0
 	sigs.k8s.io/controller-runtime v0.13.0
 )
