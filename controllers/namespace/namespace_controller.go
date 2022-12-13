@@ -38,7 +38,6 @@ import (
 const (
 	baseNs            = "snappcloud-monitoring"
 	baseSa            = "monitoring-datasource"
-	prometheusURL     = "https://thanos-querier-custom.openshift-monitoring.svc.cluster.local:9092"
 	nsMonitoringLabel = "monitoring.snappcloud.io/grafana-datasource"
 	teamLabel         = "snappcloud.io/team"
 )
@@ -47,6 +46,7 @@ const (
 var grafanaPassword = os.Getenv("GRAFANA_PASSWORD")
 var grafanaUsername = os.Getenv("GRAFANA_USERNAME")
 var grafanaURL = os.Getenv("GRAFANA_URL")
+var prometheusURL = os.Getenv("PROMETHEUS_URL")
 
 // NamespaceReconciler reconciles a Namespace object
 type NamespaceReconciler struct {

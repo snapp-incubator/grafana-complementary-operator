@@ -1,6 +1,6 @@
 module github.com/snapp-cab/grafana-complementary-operator
 
-go 1.17
+go 1.19
 
 require (
 	github.com/grafana-operator/grafana-operator/v4 v4.6.0

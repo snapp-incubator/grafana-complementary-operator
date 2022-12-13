@@ -41,6 +41,11 @@ spec:
             configMapKeyRef:
               name: grafana-complementary-config
               key: grafana-url
+        - name: PROMETHEUS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-complementary-config
+              key: prometheus-url
         imagePullPolicy: Always
         name: manager
         securityContext:
